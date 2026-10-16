@@ -1,5 +1,127 @@
 # home-dashboard
 
+**English** · [Español](#español)
+
+Family dashboard on a 6-colour e-paper frame (**Waveshare ESP32-S3-PhotoPainter**, 7.3",
+800×480). The frame wakes up a few times a day, downloads over WiFi an image already prepared by a
+home server, draws it and goes back to deep sleep, so it runs for weeks on battery.
+
+![Styles](docs/img/estilos.png)
+
+All data in the image is sample data.
+
+## Why this project exists
+The idea comes from Wes Bos's [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard):
+take a cheap Android photo frame, root it, remove the manufacturer's app and show a full-screen web
+page with the family dashboard. It's a great idea, but those frames are tablets with an LCD screen
+that is on all day, and they have to be plugged in all the time.
+
+I wanted the dashboard in a spot at home **with no power outlets**. I didn't want a cable running
+across the wall either, or having to remember every few days to charge the frame or swap a USB
+battery. It had to just work: hang it and forget about it for months.
+
+For that the screen has to be **e-paper** (electronic ink), and the hardware has to be designed to
+sleep.
+
+### Why e-paper uses so little power
+- **It only draws power when the image changes.** An LCD or OLED screen spends energy on every
+  frame, 60 times per second, even if the image doesn't change. An e-paper display moves pigment
+  particles and they stay where they are. The image is kept **with no power**: even with the
+  battery disconnected, the frame keeps showing the last dashboard.
+- **No backlight.** You see it with the room's light, like paper. This saves the most
+  power-hungry part of a normal screen, and it doesn't glare at night.
+- **A family dashboard doesn't need real time.** The date, the weather, the calendar or the school
+  lunch menu change a few times a day. Updating the image three times a day is enough (for
+  example at 6:00, 16:00 and 22:00).
+
+### How this project takes advantage of it
+1. The frame spends almost all its time in **deep sleep**. The ESP32-S3 turns off the CPU, WiFi and
+   the display, and only the timer that will wake it up stays on.
+2. On waking it connects to WiFi and downloads a **finished** image (dithered, packed and ready for
+   the panel). The heavy lifting (fetching data, layout, converting to 6 colours) is done by a
+   computer at home that was already on, not by the frame's battery.
+3. It draws the image (~25 s refresh) and goes back to sleep. The server tells it how many seconds
+   to sleep until the next update (`X-Sleep-Seconds`).
+4. If the data hasn't changed, the server replies `204`. The frame doesn't even refresh the panel,
+   which is the most expensive part of each cycle.
+5. Before sleeping, the unneeded rails (audio, SD, LEDs) are switched off through the AXP2101/TG28
+   PMIC.
+
+Each cycle lasts about 30–40 seconds. The rest of the day, more than 99.9 % of the time, the frame
+is asleep.
+
+### ~7 months per charge: where the number comes from
+It's an estimate, not a measurement. It assumes a Rev 2 board, a 3000 mAh LiPo and three updates a
+day:
+
+| Item | Rough calculation | mAh/day |
+|---|---|---|
+| Updates | 3 cycles × ~35 s × ~50–60 mA average (WiFi + panel refresh) | ~1.5 |
+| Deep sleep | ~0.4 mA × 24 h | ~9.6 |
+| **Total** | | **~11** |
+
+3000 mAh ÷ 11 mAh/day ≈ 270 days. Leaving a 20 % margin (the battery never fully drains, it ages
+and cold reduces its capacity), that's **~2400 usable mAh ÷ 11 ≈ 7 months**.
+
+The key point of the table is that almost all the consumption is **sleep**, not updates. So
+battery life depends mostly on the board's deep-sleep current:
+- The Waveshare wiki says ≤ 1 mA. At 1 mA you get about 3 months.
+- On Rev 1, users measured ~2 mA (see `docs/issues-photopainter.md`). That gives about 6 weeks.
+- Rev 2 fixes some of those PMIC issues, and other firmwares for this board claim to get down to
+  tens of µA. Every tenth of a mA saved in sleep shows up as weeks of battery life.
+
+For comparison: a 10" LCD photo frame draws around 5–10 W when on. With the same battery
+(3000 mAh × 3.7 V ≈ 11 Wh) it would last **one or two hours**.
+
+When it's time to charge, just take it down and plug it in via USB-C. The battery icon in the top
+right corner gives plenty of warning (red below 20 %).
+
+## Contents
+| Folder | What's inside |
+|---|---|
+| `firmware/` | PlatformIO + Arduino (`espressif32@6.9.0`, XPowersLib). Boot → PMU → WiFi → `GET SERVER_URL` → draw → deep sleep. |
+| `server/` | Python + Pillow: `render.py` (layout and 4 styles), `icons.py` (icons drawn with primitives), `epaper.py` (Floyd-Steinberg dither to the 6-colour palette and 4 bpp packing). |
+| `docs/` | Hardware and pins, bill of materials, compatible batteries, panel design, known board issues, other displays and links (in Spanish). |
+
+The HTTP server and the data sources (weather, calendar, menu, activities) of the original project
+are not included: everyone plugs in their own and passes `render.render()` a `dict` like the one
+from `render.fixture()`.
+
+## Try the renderer
+```sh
+cd server
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python render.py --fixture --estilo comic preview.png   # clasico, comic, pizarra, arcoiris
+```
+Fonts are the macOS ones (`/System/Library/Fonts`); on another system change the paths in
+`render.py`.
+
+## Firmware
+```sh
+cd firmware
+cp include/secrets.example.h include/secrets.h   # WiFi and server URL; not committed to git
+pio run -t upload && pio device monitor
+```
+
+## Firmware ↔ server contract
+`GET SERVER_URL?bat=&usb=&boot=&rssi=&key=` must respond:
+- `200` with exactly **192,000 bytes** (4 bpp, 2 px/byte, indices Black=0 White=1 Yellow=2
+  Red=3 Blue=5 Green=6): the frame draws it. Produced by `epaper.to_frame(render.render(data))`.
+- `204`: nothing new, the frame leaves the panel untouched.
+- Both with `X-Sleep-Seconds` (seconds until the next wake-up, clamped to 5 min–24 h).
+- Anything else: the frame keeps the image and retries in 30 min.
+
+Details in [docs/hardware.md](docs/hardware.md).
+
+## License
+MIT © nachoad. You can reuse the code as long as you keep the copyright notice and the license.
+
+---
+
+# Español
+
+[English](#home-dashboard) · **Español**
+
 Dashboard familiar en un marco e-paper de 6 colores (**Waveshare ESP32-S3-PhotoPainter**, 7,3",
 800×480). El marco despierta unas pocas veces al día, descarga por WiFi una imagen ya preparada por
 un servidor de casa, la pinta y vuelve a deep sleep, así que funciona semanas con batería.
