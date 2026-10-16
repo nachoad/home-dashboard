@@ -1,0 +1,7 @@
+firmware/include/secrets.h
+firmware/.pio/
+server/.venv/
+__pycache__/
+.DS_Store
+*.png
+!docs/img/*.png
