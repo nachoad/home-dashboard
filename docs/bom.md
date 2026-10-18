@@ -17,8 +17,20 @@ No hace falta: pila RTC de respaldo (https://www.waveshare.com/rtc-battery.htm);
 el servidor en la imagen.
 
 ## Autonomía estimada
-1500 mAh, 4 actualizaciones/día: con ≤1 mA en sleep (wiki) ~30 mAh/día → 6–7 semanas; con los
-**~2 mA medidos por usuarios en la Rev 1** (`issues-photopainter.md`) ~55 mAh/día → **~4 semanas**.
-La Rev 2 (ver `hardware.md`) debería consumir menos.
+Cálculo teórico con 3 actualizaciones/día (6, 16 y 22 h):
+- **Cada despertar ≈ 0,7 mAh:** arranque + WiFi + descarga de 192 KB (~5 s a ~110 mA ≈ 0,15 mAh) y
+  refresco del panel (~25 s a ~50 mA ≈ 0,35 mAh), con margen. En total, ~2 mAh/día.
+- **Deep sleep: es casi todo el gasto.** 1 mA (wiki) = 24 mAh/día; 2 mA (medido por usuarios en la
+  Rev 1, `issues-photopainter.md`) = 48 mAh/día. La Rev 2 (ver `hardware.md`) debería consumir
+  menos.
+- **Capacidad útil ≈ 85 %** de la nominal (corte a ~3,3 V para el regulador, envejecimiento).
 
-Con una batería de 3000 mAh: ~14 semanas a 30 mAh/día y ~8 semanas a 55 mAh/día.
+| Sleep | mAh/día | 1500 mAh (útil ~1275) | 3000 mAh (útil ~2550) |
+|---|---|---|---|
+| 2 mA | ~50 | ~3,5 semanas | **~7 semanas** |
+| 1 mA | ~26 | ~7 semanas | **~14 semanas (~3 meses)** |
+| 0,5 mA | ~14 | ~3 meses | ~6 meses |
+| 0,3 mA | ~9 | ~4,5 meses | ~9 meses |
+
+Con menos de ~0,3 mA el sleep deja de dominar y la autodescarga de la LiPo (~2–3 %/mes) empieza a
+pesar.

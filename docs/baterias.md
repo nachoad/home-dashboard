@@ -30,7 +30,7 @@ Amazon oculta el precio en la ficha ("añádelo a la cesta"). Los precios son lo
 del selector de variantes o del carrusel de productos similares. Las medidas y el resto de datos
 salen de la ficha y no están verificados.
 
-Autonomía orientativa a ~30 mAh/día (4 actualizaciones/día, ver `bom.md`).
+Autonomía orientativa a ~26 mAh/día y 85 % de capacidad útil (1 mA en sleep, 3 actualizaciones/día, ver `bom.md`).
 
 | Batería | Capacidad | Medidas (mm) | Conector | Protección | Uds. | Precio | Autonomía | Notas | Link |
 |---|---|---|---|---|---|---|---|---|---|
