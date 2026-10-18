@@ -11,11 +11,6 @@ home server, draws it and goes back to deep sleep, so it runs for weeks on batte
 All data in the image is sample data.
 
 ## Why this project exists
-The idea comes from Wes Bos's [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard):
-take a cheap Android photo frame, root it, remove the manufacturer's app and show a full-screen web
-page with the family dashboard. It's a great idea, but those frames are tablets with an LCD screen
-that is on all day, and they have to be plugged in all the time.
-
 I wanted the dashboard in a spot at home **with no power outlets**. I didn't want a cable running
 across the wall either, or having to remember every few days to charge the frame or swap a USB
 battery. It had to just work: hang it and forget about it for months.
@@ -116,6 +111,12 @@ Details in [docs/hardware.md](docs/hardware.md).
 ## License
 MIT © nachoad. You can reuse the code as long as you keep the copyright notice and the license.
 
+## Inspiration
+The idea comes from Wes Bos's [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard):
+take a cheap Android photo frame, root it, remove the manufacturer's app and show a full-screen web
+page with the family dashboard. It's a great idea, but those frames are tablets with an LCD screen
+that is on all day, and they have to be plugged in all the time.
+
 ---
 
 # Español
@@ -131,11 +132,6 @@ un servidor de casa, la pinta y vuelve a deep sleep, así que funciona semanas c
 Todos los datos de la imagen son de ejemplo.
 
 ## Por qué existe este proyecto
-La idea viene de [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard), de Wes
-Bos: coger un marco de fotos Android barato, rootearlo, quitar la app del fabricante y poner una
-web a pantalla completa con el dashboard de la familia. Es una idea estupenda, pero esos marcos
-son tablets con pantalla LCD encendida todo el día y tienen que estar enchufados siempre.
-
 Yo quería el dashboard en un sitio de casa **donde no hay enchufes**. Tampoco quería un cable
 cruzando la pared, ni tener que acordarme cada pocos días de cargar el marco o cambiarle una
 batería USB. Tenía que funcionar solo: colgarlo y olvidarse de él durante meses.
@@ -236,3 +232,9 @@ Detalle en [docs/hardware.md](docs/hardware.md).
 
 ## Licencia
 MIT © nachoad. Puedes reutilizar el código manteniendo el aviso de copyright y la licencia.
+
+## Inspiración
+La idea viene de [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard), de Wes
+Bos: coger un marco de fotos Android barato, rootearlo, quitar la app del fabricante y poner una
+web a pantalla completa con el dashboard de la familia. Es una idea estupenda, pero esos marcos
+son tablets con pantalla LCD encendida todo el día y tienen que estar enchufados siempre.
