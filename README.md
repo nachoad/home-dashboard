@@ -50,25 +50,25 @@ sleep.
 Each cycle lasts about 30–40 seconds. The rest of the day, more than 99.9 % of the time, the frame
 is asleep.
 
-### ~7 months per charge: where the number comes from
-It's an estimate, not a measurement. It assumes a Rev 2 board, a 3000 mAh LiPo and three updates a
-day:
+### ~3 months per charge: where the number comes from
+It's an estimate, not a measurement. It assumes a 3000 mAh LiPo, three updates a day and the
+deep-sleep current given by the Waveshare wiki (≤ 1 mA):
 
 | Item | Rough calculation | mAh/day |
 |---|---|---|
-| Updates | 3 cycles × ~35 s × ~50–60 mA average (WiFi + panel refresh) | ~1.5 |
-| Deep sleep | ~0.4 mA × 24 h | ~9.6 |
-| **Total** | | **~11** |
+| Updates | 3 cycles × ~0.7 mAh (~5 s WiFi + download at ~110 mA, ~25 s panel refresh at ~50 mA) | ~2 |
+| Deep sleep | 1 mA × 24 h | 24 |
+| **Total** | | **~26** |
 
-3000 mAh ÷ 11 mAh/day ≈ 270 days. Leaving a 20 % margin (the battery never fully drains, it ages
-and cold reduces its capacity), that's **~2400 usable mAh ÷ 11 ≈ 7 months**.
+Leaving a 15 % margin (the battery never fully drains, it ages and cold reduces its capacity),
+that's **~2550 usable mAh ÷ 26 ≈ 100 days, about 3 months**.
 
 The key point of the table is that almost all the consumption is **sleep**, not updates. So
 battery life depends mostly on the board's deep-sleep current:
-- The Waveshare wiki says ≤ 1 mA. At 1 mA you get about 3 months.
-- On Rev 1, users measured ~2 mA (see `docs/issues-photopainter.md`). That gives about 6 weeks.
+- On Rev 1, users measured ~2 mA (see `docs/issues-photopainter.md`). That gives about 7 weeks.
 - Rev 2 fixes some of those PMIC issues, and other firmwares for this board claim to get down to
-  tens of µA. Every tenth of a mA saved in sleep shows up as weeks of battery life.
+  tens of µA. At 0.5 mA it would be ~6 months, and at 0.3 mA ~9 months. Every tenth of a mA saved
+  in sleep shows up as weeks of battery life.
 
 For comparison: a 10" LCD photo frame draws around 5–10 W when on. With the same battery
 (3000 mAh × 3.7 V ≈ 11 Wh) it would last **one or two hours**.
@@ -170,26 +170,26 @@ pensado para dormir.
 Cada ciclo dura unos 30–40 segundos. El resto del día, más del 99,9 % del tiempo, el marco está
 dormido.
 
-### ~7 meses con una carga: de dónde sale la cifra
-Es una estimación, no una medida. Supone una placa Rev 2, una LiPo de 3000 mAh y tres
-actualizaciones al día:
+### ~3 meses con una carga: de dónde sale la cifra
+Es una estimación, no una medida. Supone una LiPo de 3000 mAh, tres actualizaciones al día y la
+corriente en deep sleep que da la wiki de Waveshare (≤ 1 mA):
 
 | Concepto | Cálculo aproximado | mAh/día |
 |---|---|---|
-| Actualizaciones | 3 ciclos × ~35 s × ~50–60 mA de media (WiFi + refresco del panel) | ~1,5 |
-| Deep sleep | ~0,4 mA × 24 h | ~9,6 |
-| **Total** | | **~11** |
+| Actualizaciones | 3 ciclos × ~0,7 mAh (~5 s de WiFi + descarga a ~110 mA, ~25 s de refresco del panel a ~50 mA) | ~2 |
+| Deep sleep | 1 mA × 24 h | 24 |
+| **Total** | | **~26** |
 
-3000 mAh ÷ 11 mAh/día ≈ 270 días. Si se deja un margen del 20 % (la batería no se vacía del todo,
-envejece y el frío le quita capacidad), quedan **~2400 mAh útiles ÷ 11 ≈ 7 meses**.
+Si se deja un margen del 15 % (la batería no se vacía del todo, envejece y el frío le quita
+capacidad), quedan **~2550 mAh útiles ÷ 26 ≈ 100 días, unos 3 meses**.
 
 Lo importante de la tabla es que casi todo el consumo es el **sueño**, no las actualizaciones.
 Por eso la autonomía depende sobre todo de la corriente en deep sleep de la placa:
-- La wiki de Waveshare habla de ≤ 1 mA. Con 1 mA salen unos 3 meses.
 - En la Rev 1, usuarios midieron ~2 mA (ver `docs/issues-photopainter.md`). Con eso salen unas
-  6 semanas.
+  7 semanas.
 - La Rev 2 corrige parte de esos problemas del PMIC, y otros firmwares para esta placa dicen bajar
-  a decenas de µA. Cada décima de mA ahorrada en sueño se nota en semanas de autonomía.
+  a decenas de µA. Con 0,5 mA serían ~6 meses, y con 0,3 mA ~9 meses. Cada décima de mA ahorrada
+  en sueño se nota en semanas de autonomía.
 
 Por comparar: un marco de fotos LCD de 10" consume del orden de 5–10 W encendido. Con esa misma
 batería (3000 mAh × 3,7 V ≈ 11 Wh) duraría **una o dos horas**.
