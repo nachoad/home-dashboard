@@ -31,11 +31,15 @@ class _Box:
         return max(1, round(k * self.s))
 
 
-def _calendar(d, b, c):
-    d.rounded_rectangle(b.r(.06, .14, .94, .94), radius=b.w(.1), outline=c, width=b.w(.09))
-    d.rectangle(b.r(.06, .14, .94, .36), fill=c)
+def _calendar_blank(d, b, c, k=.09):
+    d.rounded_rectangle(b.r(.06, .14, .94, .94), radius=b.w(.1), outline=c, width=b.w(k))
+    d.rectangle(b.r(.06, .14, .94, .36 - (.09 - k) * 1.5), fill=c)
     for u in (.3, .7):
         d.rounded_rectangle(b.r(u - .05, .04, u + .05, .24), radius=b.w(.04), fill=c)
+
+
+def _calendar(d, b, c):
+    _calendar_blank(d, b, c)
     for u in (.25, .55):
         for v in (.5, .7):
             d.rounded_rectangle(b.r(u, v, u + .2, v + .1), radius=b.w(.03), fill=c)
@@ -289,7 +293,7 @@ def battery(img: Image.Image, x: int, y: int, level: int | None, usb: bool) -> N
 
 
 ICONS = {
-    "calendar": _calendar, "sun": lambda d, b, c: _sun(d, b, YELLOW), "partly": _partly,
+    "calendar": _calendar, "calendar_blank": lambda d, b, c: _calendar_blank(d, b, c, .04), "sun": lambda d, b, c: _sun(d, b, YELLOW), "partly": _partly,
     "cloud": _cloud, "rain": _rain, "snow": _snow, "storm": _storm, "drop": _drop,
     "person": _person, "cutlery": _cutlery, "ball": _ball, "star": _star,
     "pikachu": _pikachu, "princesa": _princesa, "chupete": _chupete, "warning": _warning,

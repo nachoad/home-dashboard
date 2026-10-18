@@ -25,7 +25,7 @@ Problemas conocidos de la placa: `issues-photopainter.md`. Baterías: `baterias.
 ## Framebuffer y colores
 - 4 bpp, 2 px/byte, 192 000 bytes. Byte `y*400 + x/2`; píxel x par en nibble alto.
 - Protocolo con el servidor: `GET /frame.bin?bat=&usb=&boot=&rssi=&key=` → `200` con
-  exactamente esos 192 000 bytes (pintar), o `204` (nada nuevo: no tocar el panel). Ambos traen
+  exactamente esos 192 000 bytes (pintar), o `204` (nada nuevo: no tocar el panel; el servidor actual ya no lo usa y siempre repinta). Ambos traen
   `X-Sleep-Seconds` (el firmware lo limita a 5 min–24 h). Cualquier otra cosa → conservar la
   imagen y reintentar en 30 min. `key=1` (despertar por KEY) obliga a responder 200.
   Reservar en PSRAM (`ps_malloc`) y copiar por filas a buffer DRAM antes de SPI (DMA no lee PSRAM).

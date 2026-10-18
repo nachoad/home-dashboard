@@ -325,35 +325,40 @@ def draw_header(img, d, data):
     fg = T.header_fg
 
     # Date
-    icons.draw(img, "calendar", 12, 12, 54, T.calendar_color)
+    icons.draw(img, "calendar_blank", 6, 4, 74, T.calendar_color)
+    d.text((43, 51), str(day.day), font=font(42, "bold"), fill=T.calendar_color, anchor="mm")
     name = DAYS[day.weekday()].capitalize()
-    d.text((78, 6), name, font=font(34, "bold"), fill=fg)
+    d.text((84, 6), name, font=font(34, "bold"), fill=fg)
     if tomorrow:
-        x = 78 + d.textlength(name, font=font(34, "bold")) + 10
-        d.rounded_rectangle([x, 14, x + 74, 38], radius=6, fill=T.tomorrow_fill)
-        d.text((x + 37, 26), "MAÑANA", font=font(14, "bold"), fill=T.tomorrow_fg, anchor="mm")
-    d.text((78, 46), f"{day.day} de {MONTHS[day.month - 1]} de {day.year}",
-           font=font(20), fill=fg)
-    d.line([318, 10, 318, 70], fill=T.divider, width=1)
+        x = 84 + d.textlength(name, font=font(34, "bold")) + 3
+        w = d.textlength("MAÑANA", font=font(12, "bold")) + 6
+        d.rounded_rectangle([x, 14, x + w, 38], radius=6, fill=T.tomorrow_fill)
+        d.text((x + w / 2, 26), "MAÑANA", font=font(12, "bold"), fill=T.tomorrow_fg, anchor="mm")
+    d.text((84, 46), f"{MONTHS[day.month - 1]} de {day.year}", font=font(20), fill=fg)
+    d.line([310, 10, 310, 70], fill=T.divider, width=1)
 
     # Weather
     if weather:
-        icons.draw(img, weather["icon"] if not tomorrow else weather["day_icon"], 328, 10, 60,
+        icons.draw(img, weather["icon"] if not tomorrow else weather["day_icon"], 320, 10, 60,
                    T.weather_color)
         big = weather["temp"] if weather["temp"] is not None else weather["tmax"]
-        d.text((396, 2), f"{big}°", font=font(44, "bold"), fill=fg)
-        d.text((398, 50), fit(d, weather["desc"], font(18), 104), font=font(18), fill=fg)
+        d.text((388, 2), f"{big}°", font=font(44, "bold"), fill=fg)
+        d.text((390, 50), fit(d, weather["desc"], font(18), 110), font=font(18), fill=fg)
         x = 510
         d.line([x - 8, 10, x - 8, 70], fill=T.divider, width=1)
-        d.text((x, 6), "Máx", font=font(14), fill=fg)
-        d.text((x, 22), f"{weather['tmax']}°", font=font(24, "bold"), fill=T.max_color)
-        d.text((x + 52, 6), "Mín", font=font(14), fill=fg)
-        d.text((x + 52, 22), f"{weather['tmin']}°", font=font(24, "bold"), fill=T.min_color)
+        half = (MOTTO_X - 8 - (x - 8)) / 2  # centred between the two dividers: max left, min right
+        for i, (label, temp, color) in enumerate((("Máx", weather["tmax"], T.max_color),
+                                                  ("Mín", weather["tmin"], T.min_color))):
+            cx = x - 8 + half + (i - .5) * 48
+            d.text((cx, 8), f"{temp}°", font=font(28, "bold"), fill=color, anchor="mt")
+            d.text((cx, 33), label, font=font(12), fill=fg, anchor="mt")
         if weather["rain"] is not None:
-            icons.draw(img, "drop", x, 52, 18, T.rain_color)
-            d.text((x + 22, 52), f"{weather['rain']}%", font=font(18, "bold"), fill=T.rain_color)
+            pct = f"{weather['rain']}%"
+            rx = round(x - 8 + half - (22 + d.textlength(pct, font=font(18, "bold"))) / 2)
+            icons.draw(img, "drop", rx, 52, 18, T.rain_color)
+            d.text((rx + 22, 52), pct, font=font(18, "bold"), fill=T.rain_color)
     else:
-        d.text((330, 24), "Sin datos del tiempo", font=font(22), fill=RED)
+        d.text((322, 24), "Sin datos del tiempo", font=font(22), fill=RED)
     d.line([MOTTO_X - 8, 10, MOTTO_X - 8, 70], fill=T.divider, width=1)
 
     # Motto, time and battery
@@ -380,10 +385,10 @@ def draw_important(img, d, box, messages, umbrella=False):
     grey(img, box, 34)
     icons.draw(img, "warning", x0 + 10, y0 + 5, 24, title_color)
     d.text((x0 + 42, y0 + 4), "Importante", font=font(23, "bold"), fill=title_color)
-    size = 62
-    if umbrella:  # umbrella in the bottom-right corner when rain is likely
-        icons.draw(img, "umbrella", x1 - size - 8, y1 - size - 8, size, RED)
-    text_w = x1 - x0 - 50 - (size + 10 if umbrella else 0)
+    if umbrella:  # big umbrella behind the messages when rain is likely
+        size = 80
+        icons.draw(img, "umbrella", (x0 + x1 - size) // 2, y1 - size - 4, size, RED)
+    text_w = x1 - x0 - 50
     if not messages:
         d.text((x0 + 14, y0 + 46), "Sin avisos", font=font(18), fill=BLACK)
         return
@@ -395,15 +400,16 @@ def draw_important(img, d, box, messages, umbrella=False):
             break
         d.text((x0 + 16, y), "•", font=font(18, "bold"), fill=RED)
         for line in lines:
-            d.text((x0 + 34, y), line, font=f, fill=BLACK)
+            d.text((x0 + 34, y), line, font=f, fill=BLACK,  # white halo over the umbrella
+                   stroke_width=2 if umbrella else 0, stroke_fill=WHITE)
             y += row_h
         max_rows -= len(lines)
 
 
 def agenda_when(on, hhmm, day) -> str:
-    """'10:00' / 'Todo' for the shown day; 'Sáb 10:00' / 'Sáb' for the following ones."""
-    if on == day:
-        return hhmm or "Todo"
+    """'10:00' for the shown day; 'Sáb 10:00' for the following ones; all-day: just 'Sáb'."""
+    if on == day and hhmm:
+        return hhmm
     return f"{DAYS[on.weekday()][:3].capitalize()} {hhmm}".strip()
 
 
@@ -445,6 +451,13 @@ def draw_kid(img, d, box, kid, color, menu, day):
     title_color = T.card(img, d, box, color, 48)
     icons.draw(img, kid["icon"] or "star", x0 + 5, y0 + 2, 46, BLUE)
     T.kid_name(img, d, box, kid["name"], title_color)
+    if day.weekday() >= 5:  # weekend: big icon and a message instead of school details
+        size, cx = 112, (x0 + x1) // 2
+        icons.draw(img, kid["icon"] or "star", cx - size // 2, y0 + 56, size, BLUE)
+        for j, line in enumerate(("¡Es fin de semana!", "¡A jugar!")):
+            d.text((cx, y0 + 56 + size + 12 + j * 28), line, font=font(22, "bold"), fill=accent,
+                   anchor="mt")
+        return
 
     clothes = kid.get("clothes")
     sections = [("chandal" if clothes == "Chándal" else "uniforme" if clothes else "star",
@@ -492,8 +505,12 @@ def render(data: dict) -> Image.Image:
     T.background(img, d)
     draw_header(img, d, data)
 
-    draw_important(img, d, [536, HEADER_BOTTOM, 796, TOP_BOTTOM], data.get("importante") or [],
-                   rainy(data.get("weather")))
+    umbrella = rainy(data.get("weather"))
+    messages = list(data.get("importante") or [])
+    if umbrella:
+        tomorrow = data["day"] != data["now"].date()
+        messages.insert(0, "Mañana llueve!" if tomorrow else "Hoy llueve!")
+    draw_important(img, d, [536, HEADER_BOTTOM, 796, TOP_BOTTOM], messages, umbrella)
     draw_agenda(img, d, [8, HEADER_BOTTOM, 528, TOP_BOTTOM],
                 data.get("calendar_title") or "Calendario común", data.get("agenda"), data["day"])
 

@@ -9,9 +9,9 @@ menú, actividades) no incluidas aquí.
 ## Zonas
 | y (px) | Zona | Datos |
 |---|---|---|
-| 0–78 | Cabecera: fecha (etiqueta "MAÑANA" desde las 20 h), tiempo, máx/mín/lluvia, frase, hora y batería | tiempo (p. ej. Open-Meteo), frase del día |
-| 82–222 | Izquierda (2/3, x 8–528): **Calendario común**: hoy y mañana (viernes: hasta el domingo; domingo: domingo y lunes); los días siguientes llevan el día delante ("Sáb 10:00", "Sáb" si es de todo el día); sin emojis; 4 filas; "+N más". Derecha (1/3, x 536–796): **Importante** (mensajes con viñeta; "Sin avisos"; paraguas de 62 px en la esquina inferior derecha si ese día llueve: icono lluvia/tormenta o probabilidad ≥ 50 %, `render.rainy()`). Títulos de las dos cajas en gris, simulado con una trama de puntos negros (`grey()` en `render.py`; el panel no tiene gris) | calendario compartido, avisos |
-| 230–474 | Tres tarjetas de niños (texto 18 px; ropa y piscina 22 px): Ropa + piscina, Comida, actividades (sin título, en negrita; si no hay, no sale) | menú del comedor, actividades |
+| 0–78 | Cabecera: calendario de 74 px (`calendar_blank`, borde fino) con el número del día dentro; a su derecha el día de la semana y "<mes> de <año>" debajo (etiqueta "MAÑANA" ajustada al texto desde las 20 h; domingo desde las 15 h). Tiempo (icono, temperatura, descripción) entre las líneas x=310 y x=502. Máx/mín: números de 28 px arriba con "Máx"/"Mín" en 12 px debajo, centrados en el hueco x 502–620 (centros a 48 px); debajo, gota y % de lluvia centrados. Frase, hora y batería | tiempo (p. ej. Open-Meteo), frase del día |
+| 82–222 | Izquierda (2/3, x 8–528): **Calendario común**: hoy y mañana (viernes: hasta el domingo; domingo: domingo y lunes); los días siguientes llevan el día delante ("Sáb 10:00"); los de todo el día, siempre solo el día ("Dom"); sin emojis; 4 filas; "+N más". Derecha (1/3, x 536–796): **Importante** (mensajes con viñeta; "Sin avisos"; paraguas de 80 px de fondo, centrado y pegado abajo (texto con halo blanco), y primer aviso "Hoy llueve!" ("Mañana llueve!" cuando muestra el día siguiente) si ese día llueve: icono lluvia/tormenta o probabilidad ≥ 50 %, `render.rainy()`). Títulos de las dos cajas en gris, simulado con una trama de puntos negros (`grey()` en `render.py`; el panel no tiene gris) | calendario compartido, avisos |
+| 230–474 | Tres tarjetas de niños (texto 18 px; ropa y piscina 22 px): Ropa + piscina, Comida, actividades (sin título, en negrita; si no hay, no sale). Sábado y domingo: icono del niño de 112 px y "¡Es fin de semana! ¡A jugar!" debajo | menú del comedor, actividades |
 
 ## Estilos
 Cada estilo es una subclase de `Theme` en `render.py` (fuentes, colores de cabecera,
@@ -31,7 +31,7 @@ Ver uno sin cambiar el panel:
 `cd server && .venv/bin/python render.py --fixture --estilo comic comic.png`.
 
 ## Iconos
-Dibujados con primitivas de Pillow en `icons.py` (calendario, tiempo, persona, cubiertos,
+Dibujados con primitivas de Pillow en `icons.py` (calendario, con y sin cuadritos, tiempo, persona, cubiertos,
 balón, estrella, aviso, Pikachu, princesa, chupete, uniforme, chándal). Un PNG en `server/assets/<nombre>.png`
 sustituye al dibujado.
 

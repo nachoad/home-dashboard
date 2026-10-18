@@ -70,6 +70,11 @@ El detalle de cada enlace está en las secciones de abajo.
   (4", 7.3", 13.3") y B/N vía `waveshare_epd`. Licencia GPL 3.0 (reutilizable).
   Docs: `docs/installation.md`, `docs/building_plugins.md`, `docs/troubleshooting.md`.
   https://github.com/fatihak/InkyPi
+- **doorplate-diy** (Data and Operations LLC) — letrero e-ink de sala de reuniones con ESP32: un
+  Mac con Flask y panel de control (`/status`, `/update`, Docker opcional); el ESP32 despierta cada
+  15 min, pide el estado por HTTP, repinta y vuelve a deep sleep (mismo esquema que este proyecto).
+  Python, licencia MIT.
+  https://github.com/dataandops/doorplate-diy
 - **esp32-photoframe** (aitjcize) — firmware ESP-IDF alternativo que soporta el PhotoPainter
   (`waveshare_photopainter_73`, objetivo por defecto). Web UI en `photoframe.local`, API REST,
   rotación desde la SD o por **URL (HTTP pull a un servidor, con ETag/304)**, dithering
