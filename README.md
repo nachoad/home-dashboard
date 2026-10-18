@@ -108,14 +108,14 @@ pio run -t upload && pio device monitor
 
 Details in [docs/hardware.md](docs/hardware.md).
 
-## License
-MIT © nachoad. You can reuse the code as long as you keep the copyright notice and the license.
-
 ## Inspiration
 The idea comes from Wes Bos's [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard):
 take a cheap Android photo frame, root it, remove the manufacturer's app and show a full-screen web
 page with the family dashboard. It's a great idea, but those frames are tablets with an LCD screen
 that is on all day, and they have to be plugged in all the time.
+
+## License
+MIT © nachoad. You can reuse the code as long as you keep the copyright notice and the license.
 
 ---
 
@@ -230,11 +230,11 @@ pio run -t upload && pio device monitor
 
 Detalle en [docs/hardware.md](docs/hardware.md).
 
-## Licencia
-MIT © nachoad. Puedes reutilizar el código manteniendo el aviso de copyright y la licencia.
-
 ## Inspiración
 La idea viene de [photo-frame-dashboard](https://github.com/wesbos/photo-frame-dashboard), de Wes
 Bos: coger un marco de fotos Android barato, rootearlo, quitar la app del fabricante y poner una
 web a pantalla completa con el dashboard de la familia. Es una idea estupenda, pero esos marcos
 son tablets con pantalla LCD encendida todo el día y tienen que estar enchufados siempre.
+
+## Licencia
+MIT © nachoad. Puedes reutilizar el código manteniendo el aviso de copyright y la licencia.
