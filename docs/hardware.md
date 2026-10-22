@@ -50,6 +50,12 @@ Problemas conocidos de la placa: `issues-photopainter.md`. Baterías: `baterias.
   https://www.waveshare.net/w/upload/a/ae/ESP32-S3-PhotoPainter-Schematic-v2.0.pdf
 - Deep sleep ≤ 1 mA según wiki. Para bajar consumo: apagar raíles AXP (ALDO3 codec, ALDO4 panel),
   PA de audio en bajo, desmontar SD, LEDs off, WiFi off antes de `esp_deep_sleep_start()`.
+- **ALDO3 y el I2C** (comprobado en nuestra Rev 2, 2026-10-19): sin ALDO3 los códecs bajan SDA/SCL a 0
+  y el PMIC deja de responder (`pmu=0`, `bat=-1`) hasta PWR 5 s. ALDO1, ALDO2 y ALDO4 no afectan.
+  Solución (secuencia oficial, `04_PowerConsumptionTest`): antes de dormir, PMIC en sleep con
+  `WAKEUP_DC_DLO_SELECT` + `WAKEUP_IRQ_PIN_TO_LOW` y ALDO3 el último; al arrancar, pulso bajo de
+  100 ms en GPIO21 (IRQ del PMIC): el PMIC despierta y restaura todos los raíles. Sin el pulso, el bus
+  sigue bloqueado.
 - Timer de deep sleep del ESP32 deriva ~1–3 %; se puede calibrar con el RTC PCF85063.
 
 ## Deep sleep con wakeup por timer (patrón oficial)
@@ -65,6 +71,11 @@ Usar `RTC_DATA_ATTR` para estado entre ciclos; `esp_sleep_get_wakeup_cause()` al
 ## Programación desde macOS
 - USB nativo (USB-Serial/JTAG) del ESP32-S3: **no necesita drivers en macOS**; aparece como `/dev/cu.usbmodem*`.
 - Auto-download en placa. Modo descarga manual: PWR 5 s (apagar) → mantener BOOT y pulsar PWR.
+  - Con nuestro firmware corriendo por USB, el auto-download a veces falla tras cargar el stub
+    (`No serial data received`): usar el modo manual.
+  - Tras flashear desde el modo manual, el reset por RTS la deja otra vez en el bootloader: PWR 5 s y
+    PWR para que arranque el programa.
+  - Si el marco está en deep sleep no aparece el puerto: pulsar KEY (con USB ya no vuelve a dormir).
 - Abrir el puerto serie (pyserial, `pio device monitor`) **reinicia la placa** (`rst:0x15 USB_UART_CHIP_RESET`).
 - Arduino IDE 2 / arduino-esp32: Board "ESP32S3 Dev Module", USB CDC On Boot: Enabled,
   USB Mode: Hardware CDC and JTAG, Flash QIO 80 MHz 16MB, PSRAM: **OPI PSRAM**,

@@ -13,6 +13,7 @@
 // I2C (AXP2101 PMIC 0x34, SHTC3 0x70, PCF85063, codecs)
 #define I2C_PIN_SDA 47
 #define I2C_PIN_SCL 48
+#define PMU_IRQ_PIN 21  // PMU IRQ; pulsed low by the ESP32 to wake the PMU from sleep
 
 // Buttons
 #define BTN_PIN_BOOT 0  // active low

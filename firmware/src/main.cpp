@@ -31,12 +31,22 @@ static void powerBegin() {
   pinMode(AUDIO_PA_PIN, OUTPUT);
   digitalWrite(AUDIO_PA_PIN, LOW);
 
+  // Wake the PMU from its sleep mode (see goToSleep): it restores the rails,
+  // ALDO3 included, so the codecs release the I2C bus. Harmless on a cold boot.
+  pinMode(PMU_IRQ_PIN, OUTPUT);
+  digitalWrite(PMU_IRQ_PIN, LOW);
+  delay(100);
+  digitalWrite(PMU_IRQ_PIN, HIGH);
+  delay(200);
+  pinMode(PMU_IRQ_PIN, INPUT);
+
   pmuOk = pmu.begin(Wire, AXP2101_SLAVE_ADDRESS, I2C_PIN_SDA, I2C_PIN_SCL);
   if (!pmuOk) {
     Serial.println("[pmu] AXP2101 not found");
     return;
   }
   // Same rail setup as the official BSP (power_bsp.cpp): DCDC1 + ALDO1-4 at 3.3 V.
+  pmu.disableSleep();
   pmu.setDC1Voltage(3300);
   pmu.setALDO1Voltage(3300);
   pmu.setALDO2Voltage(3300);
@@ -92,7 +102,8 @@ static uint32_t serverSleep(HTTPClient &http) {
 // server answered 204 (nothing new to show).
 static uint32_t fetchFrame(uint8_t *frame, bool keyWake, bool *repaint) {
   String url = String(SERVER_URL) + "?bat=" + batteryPercent() + "&usb=" + (onUsb() ? 1 : 0) +
-               "&boot=" + bootCount + "&rssi=" + WiFi.RSSI() + "&key=" + (keyWake ? 1 : 0);
+               "&boot=" + bootCount + "&rssi=" + WiFi.RSSI() + "&key=" + (keyWake ? 1 : 0) +
+               "&pmu=" + (pmuOk ? 1 : 0) + "&mv=" + (pmuOk ? pmu.getBattVoltage() : 0);
   HTTPClient http;
   http.setTimeout(HTTP_TIMEOUT_MS);
   http.begin(url);
@@ -158,11 +169,21 @@ static void goToSleep(uint32_t seconds) {
 #endif
 
   if (pmuOk) {
+    // Official Waveshare sequence (04_PowerConsumptionTest): put the PMU to sleep
+    // so that on wake-up (IRQ pin pulsed low in powerBegin) it restores the rails
+    // it had before. ALDO3 goes last: without it the codecs clamp SDA/SCL low and
+    // only that PMU wake-up brings the bus back.
+    pmu.disableIRQ(XPOWERS_AXP2101_ALL_IRQ);
+    pmu.clearIrqStatus();
+    pmu.wakeupControl(XPOWERS_AXP2101_WAKEUP_DC_DLO_SELECT, true);
+    pmu.wakeupControl(XPOWERS_AXP2101_WAKEUP_PWROK_TO_LOW, false);
+    pmu.wakeupControl(XPOWERS_AXP2101_WAKEUP_IRQ_PIN_TO_LOW, true);
+    pmu.enableSleep();
     // ALDO rails feed the panel, codecs and SD card; DCDC1 (ESP32) stays on.
     pmu.disableALDO1();
     pmu.disableALDO2();
-    pmu.disableALDO3();
     pmu.disableALDO4();
+    pmu.disableALDO3();
   }
   gpio_hold_en((gpio_num_t)AUDIO_PA_PIN);
 

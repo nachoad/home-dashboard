@@ -43,6 +43,11 @@ Resumen de los issues cerrados de https://github.com/waveshareteam/ESP32-S3-Phot
   apaga ALDO3, al despertar el codec sin alimentar tira del I2C a masa y `axp2101.begin()` falla.
   - Waveshare: apagar ALDO3 **lo último** y dar más retardo al despertar. También dice que no hace
     falta apagar el codec, basta su modo de bajo consumo (2–3 mA más).
+  - **Comprobado en nuestra Rev 2 (2026-10-19):** el bus queda a 0 en cuanto se apaga ALDO3, y el PMIC
+    guarda el raíl apagado, así que ningún retardo lo arregla (solo PWR 5 s). Funciona la secuencia de
+    `04_PowerConsumptionTest`: PMIC en sleep con restauración de raíles y despertar por su IRQ, ALDO3
+    el último, y al arrancar un pulso bajo de 100 ms en GPIO21. Sin el pulso no despierta.
+    Detalle en `hardware.md`.
   - Usuario (@CrazyRangerBob): el I2C cruza los dominios `VCC_3V3` y `Audio_VCC`. Con el audio
     apagado, las pull-ups alimentan el codec por sus diodos de protección, así que no se llega a µA.
 - No hay pistas que cortar para dejar solo ESP32 + pantalla. Waveshare: se podría bajar algo
