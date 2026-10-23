@@ -42,6 +42,9 @@ KID_COLORS = ["amarillo", "rojo", "verde"]
 HEADER_BOTTOM = 82
 TOP_BOTTOM = 222  # shared calendar (left) and "Importante" box (right)
 KIDS = (230, 474)
+# Friday 12 h to Monday 6 h: shorter kid cards, taller calendar and "Importante" boxes
+TOP_BOTTOM_WEEKEND = 300
+KIDS_WEEKEND = (308, 474)
 MOTTO_X = 628  # motto area: MOTTO_X..WIDTH - 8
 MOTTO_CX = (MOTTO_X + WIDTH - 8) // 2
 
@@ -406,14 +409,21 @@ def draw_important(img, d, box, messages, umbrella=False):
         max_rows -= len(lines)
 
 
-def agenda_when(on, hhmm, day) -> str:
-    """'10:00' for the shown day; 'Sáb 10:00' for the following ones; all-day: just 'Sáb'."""
+def weekend_layout(day, now) -> bool:
+    """Shown day is Saturday or Sunday, or Monday seen on Sunday (until the Monday 6 h update)."""
+    return day.weekday() >= 5 or (day.weekday() == 0 and now.date() < day)
+
+
+def agenda_when(on, hhmm, day, today=None) -> str:
+    """'10:00' for the shown day; 'Sáb 10:00' for other days ('Hoy 21:00' for today when the
+    shown day is tomorrow); all-day: just 'Sáb' or 'Hoy'."""
     if on == day and hhmm:
         return hhmm
-    return f"{DAYS[on.weekday()][:3].capitalize()} {hhmm}".strip()
+    name = "Hoy" if on == today else DAYS[on.weekday()][:3].capitalize()
+    return f"{name} {hhmm}".strip()
 
 
-def draw_agenda(img, d, box, title, items, day):
+def draw_agenda(img, d, box, title, items, day, today, size=18):
     x0, y0, x1, y1 = box
     _, _, accent = COLORS["azul"]
     title_color = T.card(img, d, box, "gris", 34)
@@ -426,18 +436,18 @@ def draw_agenda(img, d, box, title, items, day):
     if not items:
         d.text((x0 + 14, y0 + 46), "Nada en la agenda", font=font(18), fill=BLACK)
         return
-    row_h, top = 23, y0 + 39
+    row_h, top = size * 5 // 4 + 1, y0 + 39  # 23 px rows at 18 px, 28 at 22
     max_rows = (y1 - top - 2) // row_h
     shown = items if len(items) <= max_rows else items[:max_rows - 1]
-    whens = [agenda_when(on, hhmm, day) for on, hhmm, _ in shown]
-    tx = x0 + max([76] + [24 + int(d.textlength(w, font=font(18, "bold"))) for w in whens])
+    whens = [agenda_when(on, hhmm, day, today) for on, hhmm, _ in shown]
+    tx = x0 + max([76 * size // 18] + [24 + int(d.textlength(w, font=font(size, "bold"))) for w in whens])
     for i, ((_, _, text), when) in enumerate(zip(shown, whens)):
         y = top + i * row_h
-        d.text((x0 + 14, y), when, font=font(18, "bold"), fill=accent)
-        d.text((tx, y), fit(d, text, font(18), x1 - tx - 14), font=font(18), fill=BLACK)
+        d.text((x0 + 14, y), when, font=font(size, "bold"), fill=accent)
+        d.text((tx, y), fit(d, text, font(size), x1 - tx - 14), font=font(size), fill=BLACK)
     if len(shown) < len(items):
         d.text((tx, top + len(shown) * row_h), f"+{len(items) - len(shown)} más",
-               font=font(18, "italic"), fill=BLACK)
+               font=font(size, "italic"), fill=BLACK)
 
 
 def menu_lines(menu) -> list[str]:
@@ -445,28 +455,35 @@ def menu_lines(menu) -> list[str]:
     return [p for p in ((menu or {}).get("primero"), (menu or {}).get("segundo")) if p]
 
 
-def draw_kid(img, d, box, kid, color, menu, day):
+def draw_kid(img, d, box, kid, color, menu, day, compact=False):
     x0, y0, x1, y1 = box
     fill, _, accent = COLORS[color]
     title_color = T.card(img, d, box, color, 48)
     icons.draw(img, kid["icon"] or "star", x0 + 5, y0 + 2, 46, BLUE)
     T.kid_name(img, d, box, kid["name"], title_color)
     if day.weekday() >= 5:  # weekend: big icon and a message instead of school details
-        size, cx = 112, (x0 + x1) // 2
-        icons.draw(img, kid["icon"] or "star", cx - size // 2, y0 + 56, size, BLUE)
+        top, size, text, step = (52, 52, 18, 22) if compact else (56, 112, 22, 28)
+        cx = (x0 + x1) // 2
+        icons.draw(img, kid["icon"] or "star", cx - size // 2, y0 + top, size, BLUE)
         for j, line in enumerate(("¡Es fin de semana!", "¡A jugar!")):
-            d.text((cx, y0 + 56 + size + 12 + j * 28), line, font=font(22, "bold"), fill=accent,
-                   anchor="mt")
+            d.text((cx, y0 + top + size + text // 2 + 1 + j * step), line,
+                   font=font(text, "bold"), fill=accent, anchor="mt")
         return
 
     clothes = kid.get("clothes")
-    sections = [("chandal" if clothes == "Chándal" else "uniforme" if clothes else "star",
-                 clothes or "—", ["Piscina" if kid.get("pool") else ""], 1, 22)]
+    clothes_icon = "chandal" if clothes == "Chándal" else "uniforme" if clothes else "star"
     dishes = menu_lines(menu) or ["Sin cole" if day.weekday() >= 5 else "—"]
-    sections.append(("cutlery", "Comida", dishes, 3, 18))
+    if compact:  # short card: pool on the clothes line, no "Comida" title, smaller text
+        title = (clothes or "—") + (" y piscina" if kid.get("pool") else "")
+        sections = [(clothes_icon, title, [], 1, 18), ("cutlery", None, dishes, 2, 16)]
+        small, icon_size = 16, 22
+    else:
+        sections = [(clothes_icon, clothes or "—", ["Piscina" if kid.get("pool") else ""], 1, 22),
+                    ("cutlery", "Comida", dishes, 3, 18)]
+        small, icon_size = 18, 26
     acts = [f"{t}  {what}".strip() for t, what in kid["activities"]]
     if acts:  # no title: the activity itself is the label
-        sections.append(("ball", None, acts, 2, 18))
+        sections.append(("ball", None, acts, 2, small))
 
     width, top = x1 - x0 - 50, y0 + 51
     wrapped = []
@@ -476,7 +493,7 @@ def draw_kid(img, d, box, kid, color, menu, day):
             out += wrap(d, line, font(size), width, max_lines - len(out))
             if len(out) >= max_lines:
                 break
-        wrapped.append((icon, title, out or [""], size))
+        wrapped.append((icon, title, out or [""] if lines else [], size))
     # each section takes only the lines it uses (title size + 3, line size + 2);
     # spare room goes between sections
     used = sum((size + 3 if title else 0) + len(out) * (size + 2)
@@ -485,12 +502,13 @@ def draw_kid(img, d, box, kid, color, menu, day):
     y = top
     for icon, title, out, size in wrapped:
         body, label = font(size), font(size, "bold")
-        icons.draw(img, icon, x0 + 9, y + 2, 26, accent if icon in ("cutlery", "ball") else fill)
+        icons.draw(img, icon, x0 + 9, y + 2, icon_size, accent if icon in ("cutlery", "ball") else fill)
         if title:
             d.text((x0 + 42, y), title, font=label, fill=accent)
             y += size + 3
         for j, line in enumerate(out):
-            d.text((x0 + 42, y + j * (size + 2)), line, font=body if title else label, fill=BLACK)
+            d.text((x0 + 42, y + j * (size + 2)), line, font=label if icon == "ball" else body,
+                   fill=BLACK)
         y += len(out) * (size + 2) + gap
 
 
@@ -510,14 +528,18 @@ def render(data: dict) -> Image.Image:
     if umbrella:
         tomorrow = data["day"] != data["now"].date()
         messages.insert(0, "Mañana llueve!" if tomorrow else "Hoy llueve!")
-    draw_important(img, d, [536, HEADER_BOTTOM, 796, TOP_BOTTOM], messages, umbrella)
-    draw_agenda(img, d, [8, HEADER_BOTTOM, 528, TOP_BOTTOM],
-                data.get("calendar_title") or "Calendario común", data.get("agenda"), data["day"])
+    compact = weekend_layout(data["day"], data["now"])
+    top_bottom, kids_box = (TOP_BOTTOM_WEEKEND, KIDS_WEEKEND) if compact else (TOP_BOTTOM, KIDS)
+    draw_important(img, d, [536, HEADER_BOTTOM, 796, top_bottom], messages, umbrella)
+    draw_agenda(img, d, [8, HEADER_BOTTOM, 528, top_bottom],
+                data.get("calendar_title") or "Calendario común", data.get("agenda"), data["day"],
+                data["now"].date(), size=22 if compact else 18)
 
     for i, kid in enumerate(data.get("kids", [])[:3]):
         x0 = 8 + i * 264
         color = kid["color"] if kid.get("color") in COLORS else KID_COLORS[i]
-        draw_kid(img, d, [x0, KIDS[0], x0 + 256, KIDS[1]], kid, color, data.get("menu"), data["day"])
+        draw_kid(img, d, [x0, kids_box[0], x0 + 256, kids_box[1]], kid, color, data.get("menu"),
+                 data["day"], compact)
     return img
 
 
