@@ -6,7 +6,7 @@ Family dashboard on a 6-colour e-paper frame (**Waveshare ESP32-S3-PhotoPainter*
 800×480). The frame wakes up a few times a day, downloads over WiFi an image already prepared by a
 home server, draws it and goes back to deep sleep, so it runs for weeks on battery.
 
-![Styles](docs/img/estilos.png)
+![Home dashboard](docs/img/home-dashboard-nacho-alonso.png)
 
 All data in the image is sample data.
 
@@ -71,6 +71,8 @@ For comparison: a 10" LCD photo frame draws around 5–10 W when on. With the sa
 When it's time to charge, just take it down and plug it in via USB-C. The battery icon in the top
 right corner gives plenty of warning (red below 20 %).
 
+![Styles](docs/img/estilos.png)
+
 ## Contents
 | Folder | What's inside |
 |---|---|
@@ -127,7 +129,7 @@ Dashboard familiar en un marco e-paper de 6 colores (**Waveshare ESP32-S3-PhotoP
 800×480). El marco despierta unas pocas veces al día, descarga por WiFi una imagen ya preparada por
 un servidor de casa, la pinta y vuelve a deep sleep, así que funciona semanas con batería.
 
-![Estilos](docs/img/estilos.png)
+![Home dashboard](docs/img/home-dashboard-nacho-alonso.png)
 
 Todos los datos de la imagen son de ejemplo.
 
@@ -192,6 +194,8 @@ batería (3000 mAh × 3,7 V ≈ 11 Wh) duraría **una o dos horas**.
 
 Cuando toca cargarlo, basta con descolgarlo y enchufarlo por USB-C. El icono de batería de la
 esquina superior derecha avisa con tiempo (rojo por debajo del 20 %).
+
+![Estilos](docs/img/estilos.png)
 
 ## Contenido
 | Carpeta | Qué hay |
