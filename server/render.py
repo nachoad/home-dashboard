@@ -544,30 +544,28 @@ def render(data: dict) -> Image.Image:
 
 
 def fixture(now: datetime | None = None) -> dict:
-    """Sample data for the demo mode and for design work. Dates follow `now`."""
-    now = now or datetime(2026, 10, 14, 16, 0)
+    """Sample data (an invented family) for design work. Dates follow `now`."""
+    now = now or datetime(2026, 8, 17, 6, 2)
     day = now.date()
     return {
-        "now": now, "day": day, "frase": "Hoy también es un gran día",
-        "device": {"bat": "78", "usb": "0"},
-        "weather": {"today": True, "code": 61, "desc": "Lluvia ligera", "icon": "rain",
-                    "day_icon": "rain", "temp": 12, "tmax": 16, "tmin": 9, "rain": 70},
-        "importante": ["Llevar la autorización firmada de la excursión", "Papá cena fuera"],
+        "now": now, "day": day, "frase": "¡Hoy es un día para reír mucho!",
+        "device": {"bat": "82", "usb": "0"},
+        "weather": {"today": True, "code": 1, "desc": "Soleado", "icon": "sun", "day_icon": "sun",
+                    "temp": 24, "tmax": 31, "tmin": 18, "rain": 5},
+        "importante": ["Comprar el regalo de la tía Rosa", "Devolver los libros a la biblioteca"],
         "calendar_title": "Calendario común",
-        "agenda": [(day, "", "Cumpleaños de la abuela"), (day, "08:30", "Reunión proyecto"),
-                   (day, "16:30", "Recoger a niño1"),
-                   (day + timedelta(days=1), "", "Excursión al campo"),
-                   (day + timedelta(days=1), "19:30", "Cena en casa")],
-        "menu": {"primero": "Crema de calabacín", "segundo": "Pollo asado", "guarnicion": "Patatas",
-                 "postre": "Fruta de temporada"},
+        "agenda": [(day, "", "Cumpleaños de la tía Rosa"), (day, "10:30", "Dentista de Bruno"),
+                   (day, "18:00", "Fiesta de cumpleaños de Martina"),
+                   (day + timedelta(days=1), "12:00", "Comida en casa de los abuelos")],
+        "menu": {"primero": "Lentejas con verduras", "segundo": "Merluza a la plancha",
+                 "guarnicion": "Ensalada", "postre": "Yogur"},
         "kids": [
-            {"name": "niño1", "icon": "pikachu", "color": "amarillo",
-             "activities": [("16:30", "Inglés"), ("18:00", "Fútbol")],
-             "notes": [(day + timedelta(days=3), "Excursión al museo")]},
-            {"name": "niño2", "icon": "princesa", "color": "rojo",
-             "activities": [("17:30", "Baile moderno")], "notes": []},
-            {"name": "niño3", "icon": "chupete", "color": "verde",
-             "activities": [], "notes": [(day, "Traer ropa de cambio")]},
+            {"name": "Bruno", "icon": "pikachu", "color": "amarillo", "clothes": "Uniforme",
+             "pool": True, "activities": [("16:30", "Judo")], "notes": []},
+            {"name": "Lucía", "icon": "princesa", "color": "rojo", "clothes": "Chándal",
+             "pool": False, "activities": [("17:00", "Patinaje")], "notes": []},
+            {"name": "Sofía", "icon": "chupete", "color": "verde", "clothes": "Chándal",
+             "pool": False, "activities": [], "notes": []},
         ],
     }
 
